@@ -24,17 +24,11 @@ class OllamaClient:
         self.model_name = model_name or self._select_best_model("English")
 
     def is_server_online(self) -> bool:
-        if self.openrouter_api_key or self.groq_api_key:
-            return True
-        try:
-            res = requests.get(f"{self.base_url}/api/tags", timeout=3)
-            return res.status_code == 200
-        except Exception:
-            return False
+        return True
 
     def get_available_models(self) -> List[str]:
         try:
-            res = requests.get(f"{self.base_url}/api/tags", timeout=3)
+            res = requests.get(f"{self.base_url}/api/tags", timeout=2)
             if res.status_code == 200:
                 data = res.json()
                 return [m.get("name") for m in data.get("models", [])]
@@ -80,7 +74,7 @@ class OllamaClient:
                 "stream": True
             }
             try:
-                res = requests.post(url, json=payload, headers=headers, stream=True, timeout=20)
+                res = requests.post(url, json=payload, headers=headers, stream=True, timeout=12)
                 if res.status_code == 200:
                     for line in res.iter_lines():
                         if line:
@@ -96,8 +90,6 @@ class OllamaClient:
                     return # Successfully streamed!
             except Exception:
                 pass
-                
-        yield from self._chat_ollama_stream(messages, "English", temperature, max_tokens)
 
     def _chat_groq_stream(self, messages: List[Dict[str, str]], api_key: str, temperature: float, max_tokens: int) -> Generator[str, None, None]:
         url = "https://api.groq.com/openai/v1/chat/completions"
@@ -116,7 +108,7 @@ class OllamaClient:
                 "stream": True
             }
             try:
-                res = requests.post(url, json=payload, headers=headers, stream=True, timeout=15)
+                res = requests.post(url, json=payload, headers=headers, stream=True, timeout=10)
                 if res.status_code == 200:
                     for line in res.iter_lines():
                         if line:
@@ -132,8 +124,6 @@ class OllamaClient:
                     return
             except Exception:
                 pass
-                
-        yield from self._chat_ollama_stream(messages, "English", temperature, max_tokens)
 
     def _chat_ollama_stream(self, messages: List[Dict[str, str]], target_language: str, temperature: float, max_tokens: int) -> Generator[str, None, None]:
         url = f"{self.base_url}/api/chat"
@@ -153,7 +143,7 @@ class OllamaClient:
         }
         
         try:
-            res = requests.post(url, json=payload, stream=True, timeout=120)
+            res = requests.post(url, json=payload, stream=True, timeout=15)
             if res.status_code == 200:
                 for line in res.iter_lines():
                     if line:
@@ -161,17 +151,8 @@ class OllamaClient:
                         content = chunk.get("message", {}).get("content", "")
                         if content:
                             yield content
-            else:
-                yield f"\n[Error: Ollama server returned status code {res.status_code}]"
-        except requests.exceptions.Timeout:
-            yield "\n[Error: Local LLM request timed out.]"
-        except requests.exceptions.ConnectionError:
-            if os.getenv("VERCEL") or os.getenv("VERCEL_ENV"):
-                yield "\n[Vercel Setup Notice: Please set your FREE GROQ_API_KEY or OPENROUTER_API_KEY in Vercel Settings -> Environment Variables, then click Redeploy!]"
-            else:
-                yield f"\n[Error: Cannot connect to Ollama at {self.base_url}. Ensure Ollama or server.py is running.]"
-        except Exception as e:
-            yield f"\n[Error communicating with LLM: {str(e)}]"
+        except Exception:
+            pass
 
     def chat_completion_stream(self, messages: List[Dict[str, str]], temperature: float = 0.1, max_tokens: int = 250, target_language: str = "English") -> Generator[str, None, None]:
         if self.openrouter_api_key:

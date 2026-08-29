@@ -85,8 +85,8 @@ class SetuXBotEngine:
                 title = cat_info.get("title", "")
                 process = cat_info.get("process", "")
                 fee = cat_info.get("fee", "")
-                matched_context.append(f"Service Overview: {title}\n{process}\nFee Range: {fee}\n")
-            return "\n".join(matched_context)
+                matched_context.append(f"• Service: {title}\n  Process: {process}\n  Fee: {fee}\n")
+            return "SetuX Official Citizen Identification Document Services:\n\n" + "\n".join(matched_context)
 
         # 1. Search Core Knowledge Base
         for service_id, service_info in services.items():
@@ -114,7 +114,16 @@ class SetuXBotEngine:
                     docs = ", ".join(cat_info.get("required_documents", []))
                     fee = cat_info.get("fee", "N/A")
                     
-                    category_text = f"Service: {title}\nMode: {mode}\nOffline Requirement Notice: {offline_note}\nFlowchart Roadmap: {flowchart}\nSetuX Steps:\n{process}\nRequired Proofs: {docs}\nSetuX Fee: {fee}\n"
+                    category_text = f"### Service: {title}\n"
+                    if mode == "ONLINE":
+                        category_text += "✅ 100% Online Process\n\n"
+                    else:
+                        category_text += f"⚠️ Offline Visit Required ({offline_note})\n\n"
+                        
+                    category_text += f"Flowchart Roadmap:\n{flowchart}\n\n"
+                    category_text += f"SetuX Step-by-Step Process:\n{process}\n\n"
+                    category_text += f"Required Documents: {docs}\n"
+                    category_text += f"SetuX Fee: {fee}\n"
                     matched_context.append(category_text)
 
         # 2. Search Learned Memory (Scanned Websites & Dynamic Facts)
@@ -123,11 +132,10 @@ class SetuXBotEngine:
             title = site_data.get("title", "")
             content = site_data.get("content", "")
             
-            # Match query keywords against website content
             words = [w for w in query_lower.split() if len(w) > 3]
             if any(w in content.lower() or w in title.lower() for w in words):
                 snippet = content[:1500]
-                matched_context.append(f"Scanned Website Knowledge ({site_url} - {title}):\n{snippet}\n")
+                matched_context.append(f"Scanned Website Information ({site_url} - {title}):\n{snippet}\n")
 
         for item in self.learned_memory.get("custom_facts", []):
             if any(w in item.get("fact", "").lower() for w in query_lower.split() if len(w) > 3):
@@ -191,7 +199,7 @@ SETUX & INTEGRATED WEBSITE KNOWLEDGE BASE:
                 yield refusal_msg
             return single_yield(), False
 
-        # 2. Retrieve KB Context & build language-targeted system prompt
+        # 2. Retrieve KB Context
         kb_context = self._retrieve_relevant_kb_context(user_query)
         system_prompt = self.build_system_prompt(kb_context, target_language=target_language)
         
@@ -202,17 +210,27 @@ SETUX & INTEGRATED WEBSITE KNOWLEDGE BASE:
             
         messages.append({"role": "user", "content": user_query})
 
-        # 3. Streamer with real-time text sanitization & memory saving
+        # 3. Stream with real-time fallback to knowledge base if LLM connection fails
         def token_streamer():
             full_response = []
+            has_tokens = False
+            
             for token in self.ollama.chat_completion_stream(messages=messages, temperature=0.1, max_tokens=250, target_language=target_language):
+                if token and not token.startswith("\n[Error"):
+                    has_tokens = True
                 full_response.append(token)
                 yield token
-            
+
+            # If LLM stream produced an error notice or no tokens, yield structured KB context as fallback!
+            if not has_tokens:
+                fallback_reply = f"\n\n{kb_context}"
+                yield fallback_reply
+                full_response.append(fallback_reply)
+
             raw_accumulated = "".join(full_response).strip()
             sanitized_accumulated = self._sanitize_response(raw_accumulated)
             
-            if sanitized_accumulated and not sanitized_accumulated.startswith("[Error"):
+            if sanitized_accumulated:
                 self.conversation_history.append({"role": "user", "content": user_query})
                 self.conversation_history.append({"role": "assistant", "content": sanitized_accumulated})
 

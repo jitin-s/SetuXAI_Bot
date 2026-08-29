@@ -40,7 +40,7 @@ class OllamaClient:
                 return [m.get("name") for m in data.get("models", [])]
         except Exception:
             pass
-        return []
+        return ["qwen2.5:1.5b"]
 
     def _select_best_model(self, target_language: str = "English") -> str:
         if self.explicit_model:
@@ -56,10 +56,10 @@ class OllamaClient:
                 
         return available[0] if available else "qwen2.5:1.5b"
 
-    def _chat_openrouter_stream(self, messages: List[Dict[str, str]], temperature: float, max_tokens: int) -> Generator[str, None, None]:
+    def _chat_openrouter_stream(self, messages: List[Dict[str, str]], api_key: str, temperature: float, max_tokens: int) -> Generator[str, None, None]:
         url = "https://openrouter.ai/api/v1/chat/completions"
         headers = {
-            "Authorization": f"Bearer {self.openrouter_api_key}",
+            "Authorization": f"Bearer {api_key}",
             "HTTP-Referer": "https://setux.com",
             "X-Title": "SetuX AI",
             "Content-Type": "application/json"
@@ -93,16 +93,16 @@ class OllamaClient:
                                         yield content
                                 except Exception:
                                     pass
-                    return
+                    return # Successfully streamed!
             except Exception:
                 pass
                 
         yield from self._chat_ollama_stream(messages, "English", temperature, max_tokens)
 
-    def _chat_groq_stream(self, messages: List[Dict[str, str]], temperature: float, max_tokens: int) -> Generator[str, None, None]:
+    def _chat_groq_stream(self, messages: List[Dict[str, str]], api_key: str, temperature: float, max_tokens: int) -> Generator[str, None, None]:
         url = "https://api.groq.com/openai/v1/chat/completions"
         headers = {
-            "Authorization": f"Bearer {self.groq_api_key}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
         
@@ -166,19 +166,18 @@ class OllamaClient:
         except requests.exceptions.Timeout:
             yield "\n[Error: Local LLM request timed out.]"
         except requests.exceptions.ConnectionError:
-            # Check if running in Vercel cloud environment
             if os.getenv("VERCEL") or os.getenv("VERCEL_ENV"):
-                yield "\n[Vercel Setup Notice: Please set your FREE OPENROUTER_API_KEY or GROQ_API_KEY in Vercel Settings -> Environment Variables, then click Redeploy!]"
+                yield "\n[Vercel Setup Notice: Please set your FREE GROQ_API_KEY or OPENROUTER_API_KEY in Vercel Settings -> Environment Variables, then click Redeploy!]"
             else:
-                yield f"\n[Error: Cannot connect to Ollama at {self.base_url}. Ensure 'ollama serve' or 'python server.py' is running on your computer.]"
+                yield f"\n[Error: Cannot connect to Ollama at {self.base_url}. Ensure Ollama or server.py is running.]"
         except Exception as e:
             yield f"\n[Error communicating with LLM: {str(e)}]"
 
     def chat_completion_stream(self, messages: List[Dict[str, str]], temperature: float = 0.1, max_tokens: int = 250, target_language: str = "English") -> Generator[str, None, None]:
         if self.openrouter_api_key:
-            yield from self._chat_openrouter_stream(messages, temperature, max_tokens)
+            yield from self._chat_openrouter_stream(messages, self.openrouter_api_key, temperature, max_tokens)
         elif self.groq_api_key:
-            yield from self._chat_groq_stream(messages, temperature, max_tokens)
+            yield from self._chat_groq_stream(messages, self.groq_api_key, temperature, max_tokens)
         else:
             yield from self._chat_ollama_stream(messages, target_language, temperature, max_tokens)
 

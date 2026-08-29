@@ -22,7 +22,7 @@ class SetuXBotEngine:
         self.scanner = WebsiteScanner()
         self.ollama = OllamaClient(model_name=model_name)
         self.conversation_history: List[Dict[str, str]] = []
-        
+
     def _load_json(self, path: str, default: Dict[str, Any] = None) -> Dict[str, Any]:
         if default is None:
             default = {}
@@ -70,6 +70,27 @@ class SetuXBotEngine:
         self._save_learned_memory()
         return {"success": True, "fact": item}
 
+    def _check_developer_attribution(self, query: str, language: str) -> str:
+        q_lower = query.lower()
+        creator_keywords = [
+            "who created you", "who created u", "who made you", "who built you",
+            "who is your developer", "who designed you", "who developed you", "who programmed you",
+            "किसने बनाया", "किसने डेवलप किया", "कोण बनवले", "बनावणार कोण", "का बनाए हैं", "बनाने वाले का नाम"
+        ]
+        
+        if any(kw in q_lower for kw in creator_keywords):
+            responses = {
+                "Hindi": "मुझे jitin.io द्वारा बनाया गया है।",
+                "Marathi": "मला jitin.io द्वारे तयार केले गेले आहे.",
+                "Bengali": "আমাকে jitin.io দ্বারা তৈরি করা হয়েছে।",
+                "Tamil": "நான் jitin.io ஆல் உருவாக்கப்பட்டேன்.",
+                "Telugu": "నేను jitin.io ద్వారా తయారు చేయబడ్డాను.",
+                "Gujarati": "મને jitin.io દ્વારા બનાવવામાં આવ્યો છે.",
+                "English": "I was created by jitin.io."
+            }
+            return responses.get(language, "I was created by jitin.io.")
+        return ""
+
     def _retrieve_relevant_kb_context(self, user_query: str) -> str:
         query_lower = user_query.lower()
         matched_context = []
@@ -86,7 +107,7 @@ class SetuXBotEngine:
                 process = cat_info.get("process", "")
                 fee = cat_info.get("fee", "")
                 matched_context.append(f"• Service: {title}\n  Process: {process}\n  Fee: {fee}\n")
-            return "SetuX Official Citizen Identification Document Services:\n\n" + "\n".join(matched_context)
+            return "SetuX Citizen Identification Document Services & Pricing Directory:\n\n" + "\n".join(matched_context)
 
         # 1. Search Core Knowledge Base
         for service_id, service_info in services.items():
@@ -120,10 +141,10 @@ class SetuXBotEngine:
                     else:
                         category_text += f"⚠️ Offline Visit Required ({offline_note})\n\n"
                         
-                    category_text += f"Flowchart Roadmap:\n{flowchart}\n\n"
-                    category_text += f"SetuX Step-by-Step Process:\n{process}\n\n"
-                    category_text += f"Required Documents: {docs}\n"
-                    category_text += f"SetuX Fee: {fee}\n"
+                    category_text += f"Visual Flowchart Roadmap:\n{flowchart}\n\n"
+                    category_text += f"SetuX Step-by-Step Procedure:\n{process}\n\n"
+                    category_text += f"Required Proof Documents: {docs}\n"
+                    category_text += f"SetuX Official Fee: {fee}\n"
                     matched_context.append(category_text)
 
         # 2. Search Learned Memory (Scanned Websites & Dynamic Facts)
@@ -135,7 +156,7 @@ class SetuXBotEngine:
             words = [w for w in query_lower.split() if len(w) > 3]
             if any(w in content.lower() or w in title.lower() for w in words):
                 snippet = content[:1500]
-                matched_context.append(f"Scanned Website Information ({site_url} - {title}):\n{snippet}\n")
+                matched_context.append(f"Scanned Website Data ({site_url} - {title}):\n{snippet}\n")
 
         for item in self.learned_memory.get("custom_facts", []):
             if any(w in item.get("fact", "").lower() for w in query_lower.split() if len(w) > 3):
@@ -174,23 +195,31 @@ class SetuXBotEngine:
         return f"""You are SetuX AI Assistant.
 
 PRIMARY GOAL:
-YOUR MAIN GOAL IS TO ASSIST USERS WITH SETUX PLATFORM SERVICES AND INTEGRATED WEBSITE KNOWLEDGE.
-USE THE SCANNED WEBSITE KNOWLEDGE AND CORE KNOWLEDGE BASE BELOW TO ANSWER ACCORDINGLY.
+ASSIST USERS WITH ACCURATE SETUX PLATFORM SERVICES AND INTEGRATED WEBSITE KNOWLEDGE.
 
 {lang_rule}
 
-STRICT INSTRUCTIONS:
-1. TRANSLATE AND WRITE ALL STEPS, PROOFS, AND FEES ENTIRELY IN THE REQUESTED SCRIPT/LANGUAGE ({target_language}).
-2. OFFLINE VISIT NOTICE:
+STRICT RESPONSE RULES:
+1. TRANSLATE ALL STEPS, PROOFS, AND FEES ENTIRELY IN THE REQUESTED SCRIPT ({target_language}).
+2. FORMAT ROADMAPS AS VISUAL TEXT FLOWCHARTS ([Step 1] ➔ [Step 2] ➔ [Step 3] ➔ [Step 4]).
+3. OFFLINE VISIT NOTICE:
    - If 100% Online, state: "✅ 100% Online Process".
    - If Offline Visit Required, state: "⚠️ Offline Visit Required" and explain SetuX Kendra Appointment / Doorstep Visit slot booking step!
-3. ONLY ANSWER FOR THE SPECIFIC SERVICE ASKED IN THE KNOWLEDGE BASE BELOW. NO OUTSIDE THIRD-PARTY WEBSITES.
+4. DEVELOPER ATTRIBUTION RULE:
+   - State "I was created by jitin.io" ONLY if explicitly asked who created/developed you. Do NOT mention jitin.io in standard document answers.
 
-SETUX & INTEGRATED WEBSITE KNOWLEDGE BASE:
+KNOWLEDGE BASE:
 {context_snippet}
 """
 
     def process_query_stream(self, user_query: str, target_language: str = "English") -> Tuple[Generator[str, None, None], bool]:
+        # 0. Check explicit developer attribution query
+        dev_response = self._check_developer_attribution(user_query, target_language)
+        if dev_response:
+            def dev_yield():
+                yield dev_response
+            return dev_yield(), True
+
         # 1. Guardrail check
         is_allowed, reason = self.guardrails.is_query_allowed(user_query)
         if not is_allowed:
@@ -210,7 +239,7 @@ SETUX & INTEGRATED WEBSITE KNOWLEDGE BASE:
             
         messages.append({"role": "user", "content": user_query})
 
-        # 3. Stream with real-time fallback to knowledge base if LLM connection fails
+        # 3. Stream response with fallback to structured knowledge base if connection is pending
         def token_streamer():
             full_response = []
             has_tokens = False
@@ -221,7 +250,6 @@ SETUX & INTEGRATED WEBSITE KNOWLEDGE BASE:
                 full_response.append(token)
                 yield token
 
-            # If LLM stream produced an error notice or no tokens, yield structured KB context as fallback!
             if not has_tokens:
                 fallback_reply = f"\n\n{kb_context}"
                 yield fallback_reply

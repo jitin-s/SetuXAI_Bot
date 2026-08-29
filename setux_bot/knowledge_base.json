@@ -1,0 +1,183 @@
+{
+  "services": {
+    "setux_overview": {
+      "name": "SetuX Complete Unified Services & Pricing Catalog",
+      "keywords": [
+        "services", "service", "plans", "plan", "facility", "facilities", "offer", "list", "options", "menu", "cost", "pricing", "fees", "setux",
+        "सेवाएं", "सेवाएँ", "सुविधाएं", "सुविधाएँ", "प्लान", "रेट", "लिस्ट", "ऑप्शन"
+      ],
+      "categories": {
+        "menu": {
+          "title": "SetuX Unified Document Portal Services Catalog",
+          "flowchart": "[SetuX Portal] ➔ [Select: 'Apply New ID' OR 'Update Center'] ➔ [Upload Proofs] ➔ [Pay Fee] ➔ [Book Slot (if offline required)] ➔ [Get SetuX Tracking ID]",
+          "process": "1. 100% ONLINE SERVICES (No Visit Needed):\n   • Aadhaar Address Update: ₹50\n   • Aadhaar Name / DOB Correction: ₹50\n   • New PAN Card Application (Form 49A e-KYC): ₹106\n   • PAN Card Data Correction: ₹106\n   • Instant e-PAN Generation: ₹0\n   • New Voter ID Registration (Form 6): ₹25\n   • Voter ID Details Correction (Form 8): ₹25\n   • Ration Card Member Addition: ₹30\n   • Ration Card Address Change: ₹30\n   • Ayushman Health Card Registration: ₹30\n\n2. HYBRID SERVICES (Online Form + Offline Visit Required):\n   • Aadhaar Mobile Number Link & Biometrics: ₹50 (⚠️ Requires physical biometric scan at SetuX Kendra / Doorstep)\n   • Aadhaar Child Mandatory Biometrics (Age 5 & 15): ₹0 (⚠️ Requires physical biometric scan at SetuX Kendra)\n   • New Driving License / Learner Test: ₹250 (⚠️ Requires physical driving test slot at RTO/Testing Track)\n   • Driving License Renewal: ₹250 (⚠️ Requires physical DL submission/Medical Form)\n   • New Passport Application Assistance (Normal/Tatkal): ₹350 (⚠️ Requires physical document verification appointment at PSK)\n   • Passport Re-issue / Correction: ₹350 (⚠️ Requires physical PSK appointment)\n\n3. HOW TO AVAIL ON SETUX:\n   Step 1: Open SetuX Portal -> Select your desired service.\n   Step 2: Upload digital copies of required proof documents.\n   Step 3: Pay the transparent SetuX service fee online.\n   Step 4: Book SetuX Doorstep Visit or Nearest Kendra Appointment (if offline visit required).\n   Step 5: Track your application status live on your SetuX Dashboard.",
+          "required_documents": ["Aadhaar Card", "Passport Photograph", "Proof of Identity", "Proof of Address"],
+          "fee": "₹0 to ₹350 depending on service"
+        }
+      }
+    },
+    "aadhaar": {
+      "name": "SetuX Aadhaar Services (Online Updates & Offline Biometric Link)",
+      "keywords": [
+        "aadhaar", "aadhar", "uidai", "myaadhaar", "आधार", "आधारकार्ड",
+        "aadhaar address", "aadhaar name", "aadhaar dob", "aadhaar mobile", "mobile link", "biometric", "फोटो", "बायोमेट्रिक", "मोबाइल", "child biometric"
+      ],
+      "categories": {
+        "mobile_linking": {
+          "title": "Aadhaar Mobile Link & Biometric Update (Offline Visit Required)",
+          "mode": "HYBRID_OFFLINE_VISIT_REQUIRED",
+          "offline_note": "⚠️ OFFLINE VISIT REQUIRED: UIDAI regulations mandate live fingerprint and iris biometric capture. Mobile linking cannot be done purely online without biometrics.",
+          "flowchart": "[Start: SetuX Portal] ➔ [Update Center] ➔ [Aadhaar Mobile Link] ➔ [Enter Details & Pay ₹50 Fee] ➔ [Book SetuX Kendra Appointment / Doorstep Slot] ➔ [Physical Biometric Scan] ➔ [Get Tracking ID]",
+          "process": "1. Open SetuX Portal & click 'Update Center'.\n2. Select 'Aadhaar Services' -> Click 'Mobile & Biometric Update'.\n3. Enter your Aadhaar number & new mobile number.\n4. Pay SetuX service fee (₹50).\n5. Book an appointment slot at the nearest SetuX Kendra OR request SetuX Doorstep Assistance.\n6. Visit Kendra at scheduled time for biometric fingerprint/iris scan.\n7. Receive OTP confirmation & track status live on SetuX.",
+          "required_documents": ["Original Aadhaar Card (No extra proof document required for mobile link)"],
+          "fee": "₹50 (SetuX Fee)"
+        },
+        "address_update": {
+          "title": "Aadhaar Address Update (100% Online)",
+          "mode": "ONLINE",
+          "offline_note": "✅ 100% ONLINE PROCESS: No offline visit required. Processed completely via online document upload.",
+          "flowchart": "[Start: SetuX Portal] ➔ [Update Center] ➔ [Aadhaar Services] ➔ [Address Update] ➔ [Upload Address Proof] ➔ [Pay ₹50 Fee] ➔ [Get SetuX Tracking ID]",
+          "process": "1. Open SetuX Portal & go to 'Update Center'.\n2. Select 'Aadhaar Services' -> Click 'Address Update'.\n3. Enter Aadhaar number & new address.\n4. Upload valid Proof of Address (Electricity bill, Bank passbook with photo, Rent agreement, Passport, or Voter ID).\n5. Pay SetuX service fee (₹50).\n6. Submit & receive your SetuX Tracking ID.",
+          "required_documents": ["Electricity/Water Bill", "Bank Passbook with photo", "Rent Agreement", "Passport", "Voter ID"],
+          "fee": "₹50 (SetuX Fee)"
+        },
+        "name_dob_correction": {
+          "title": "Aadhaar Name & DOB Correction (100% Online)",
+          "mode": "ONLINE",
+          "offline_note": "✅ 100% ONLINE PROCESS: Processed fully online via document upload.",
+          "flowchart": "[Start: SetuX Portal] ➔ [Update Center] ➔ [Aadhaar Services] ➔ [Name/DOB Correction] ➔ [Upload ID/Birth Proof] ➔ [Pay ₹50 Fee] ➔ [Get SetuX Tracking ID]",
+          "process": "1. Go to SetuX Portal -> 'Update Center'.\n2. Choose 'Aadhaar Services' -> 'Name / DOB Correction'.\n3. Fill in updated Name or Date of Birth.\n4. Upload proof document (PAN Card, Birth Certificate - mandatory for DOB, 10th Marksheet, or Passport).\n5. Pay SetuX fee (₹50).\n6. Save SetuX Tracking ID.",
+          "required_documents": ["PAN Card", "Birth Certificate (Mandatory for DOB)", "10th Marksheet", "Passport"],
+          "fee": "₹50 (SetuX Fee)"
+        },
+        "child_biometric": {
+          "title": "Aadhaar Mandatory Child Biometric Update (Age 5 & 15)",
+          "mode": "HYBRID_OFFLINE_VISIT_REQUIRED",
+          "offline_note": "⚠️ OFFLINE VISIT REQUIRED: Biometrics for children reaching age 5 or 15 require a physical biometric capture visit.",
+          "flowchart": "[Start: SetuX Portal] ➔ [Update Center] ➔ [Child Biometric Update] ➔ [Enter Child Aadhaar] ➔ [Book SetuX Kendra Appointment] ➔ [Biometric Scan] ➔ [Get Tracking ID]",
+          "process": "1. Open SetuX Portal -> 'Update Center' -> 'Child Biometric Update'.\n2. Enter Child Aadhaar Number and Parent Aadhaar.\n3. Book a free appointment at the nearest SetuX Kendra.\n4. Visit Kendra for fingerprint and photograph capture.\n5. Receive SetuX Confirmation ID.",
+          "required_documents": ["Child Aadhaar Card", "Parent Aadhaar Card"],
+          "fee": "₹0 (Free Government Mandate)"
+        }
+      }
+    },
+    "pan": {
+      "name": "SetuX PAN Card Services (New Apply, e-KYC & Correction)",
+      "keywords": [
+        "pan", "pancard", "pan card", "पैन", "पॅन", "पैनकार्ड", "पॅनकार्ड",
+        "new pan", "apply pan", "नया पैन", "नवीन पॅन", "pan correction", "pan link", "epan", "form 49a"
+      ],
+      "categories": {
+        "new_pan": {
+          "title": "Apply for New PAN Card (100% Online e-KYC)",
+          "mode": "ONLINE",
+          "offline_note": "✅ 100% ONLINE PROCESS: Processed online via e-KYC Aadhaar OTP.",
+          "flowchart": "[Start: SetuX Portal] ➔ [Apply New ID] ➔ [PAN Services] ➔ [New PAN Application (Form 49A)] ➔ [Upload Aadhaar & Photo] ➔ [Pay ₹106 Fee] ➔ [Get e-PAN & Physical Card]",
+          "process": "1. Go to SetuX Portal -> Click 'Apply New ID'.\n2. Select 'PAN Services' -> Choose 'New PAN Card Application (Form 49A)'.\n3. Fill applicant details (Name, DOB, Father's Name, Address).\n4. Upload Aadhaar Card, Passport Photo, and Signature scan.\n5. Pay SetuX fee (₹106 for Physical Card + e-PAN).\n6. Track dispatch & download e-PAN directly on SetuX.",
+          "required_documents": ["Aadhaar Card (Identity & DOB proof)", "Passport-size photograph", "Signature scan"],
+          "fee": "₹106 (Physical Card + Instant e-PAN)"
+        },
+        "pan_correction": {
+          "title": "PAN Card Data Correction (100% Online)",
+          "mode": "ONLINE",
+          "offline_note": "✅ 100% ONLINE PROCESS: Processed fully online via document upload.",
+          "flowchart": "[Start: SetuX Portal] ➔ [Update Center] ➔ [PAN Services] ➔ [PAN Data Correction] ➔ [Upload Proof] ➔ [Pay ₹106 Fee] ➔ [Get SetuX Tracking ID]",
+          "process": "1. Go to SetuX Portal -> 'Update Center'.\n2. Choose 'PAN Services' -> 'PAN Data Correction'.\n3. Select fields to correct (Name, DOB, Father's Name, Photo/Signature) & upload supporting proof.\n4. Pay SetuX fee (₹106).\n5. Track application status live on SetuX.",
+          "required_documents": ["Aadhaar Card", "Existing PAN Card copy", "Supporting correction proof"],
+          "fee": "₹106"
+        }
+      }
+    },
+    "driving_license": {
+      "name": "SetuX Driving License Services (Online Address Update & Offline Test)",
+      "keywords": [
+        "driving license", "driving licence", "dl", "licence", "license", "ड्राइविंग लाइसेंस", "ड्रायव्हिंग लायसन्स", "डीएल", "लायसन्स", "dl address", "driving license address", "new dl", "apply dl", "new driving license", "dl renewal"
+      ],
+      "categories": {
+        "new_dl": {
+          "title": "Apply for New Driving License (Offline Test Visit Required)",
+          "mode": "HYBRID_OFFLINE_VISIT_REQUIRED",
+          "offline_note": "⚠️ OFFLINE VISIT REQUIRED: Parivahan motor vehicle rules strictly mandate attending a physical driving test at the RTO / SetuX Authorized Testing Track.",
+          "flowchart": "[Start: SetuX Portal] ➔ [Apply New ID] ➔ [Driving License Services] ➔ [New DL Application] ➔ [Upload Aadhaar & Photo] ➔ [Pay ₹250 Fee] ➔ [Schedule RTO Driving Test Slot] ➔ [Attend Test Visit] ➔ [Get DL Card]",
+          "process": "1. Open SetuX Portal -> Click 'Apply New ID'.\n2. Select 'Driving License Services' -> Click 'New DL / Learner Application'.\n3. Fill applicant details (Name, DOB, Address, Blood Group).\n4. Upload Aadhaar Card, Age Proof (10th Marksheet/Birth Cert), and Passport Photo.\n5. Pay SetuX service fee (₹250).\n6. Select preferred appointment date for physical driving test at RTO / Testing Track.\n7. Attend physical driving test on appointment date & track DL card dispatch on SetuX.",
+          "required_documents": ["Aadhaar Card", "Age Proof (Birth Certificate/10th Marksheet)", "Passport Photo", "Blood Group Report", "Medical Fitness Form 1A (if age > 40)"],
+          "fee": "₹250"
+        },
+        "address_change_dl": {
+          "title": "Driving License Address Change (100% Online)",
+          "mode": "ONLINE",
+          "offline_note": "✅ 100% ONLINE PROCESS: Address update in DL is processed completely online via document upload.",
+          "flowchart": "[Start: SetuX Portal] ➔ [Update Center] ➔ [Driving License Services] ➔ [DL Address Change] ➔ [Upload Address Proof] ➔ [Pay ₹250 Fee] ➔ [Get SetuX Tracking ID]",
+          "process": "1. Open SetuX Portal & click 'Update Center'.\n2. Select 'Driving License Services' -> Choose 'Change of Address in DL'.\n3. Enter your DL Number & Date of Birth.\n4. Upload new Address Proof (Aadhaar Card or Passport).\n5. Pay SetuX service fee (₹250).\n6. Submit application & save SetuX Tracking ID.",
+          "required_documents": ["Original Driving License", "New Address Proof (Aadhaar Card / Passport)"],
+          "fee": "₹250 (SetuX Fee)"
+        }
+      }
+    },
+    "passport": {
+      "name": "SetuX Passport Assistance Services (Offline PSK Verification Required)",
+      "keywords": [
+        "passport", "pass port", "पासपोर्ट", "new passport", "apply passport", "passport correction", "passport update", "नया पासपोर्ट", "tatkal passport"
+      ],
+      "categories": {
+        "new_passport": {
+          "title": "Apply for New Passport Assistance (Offline PSK Verification Required)",
+          "mode": "HYBRID_OFFLINE_VISIT_REQUIRED",
+          "offline_note": "⚠️ OFFLINE VISIT REQUIRED: Passport Act mandates a physical visit to the Passport Seva Kendra (PSK) for original document inspection and biometric capture.",
+          "flowchart": "[Start: SetuX Portal] ➔ [Apply New ID] ➔ [Passport Services] ➔ [New Application (Normal/Tatkal)] ➔ [Upload Aadhaar & Proofs] ➔ [Pay ₹350 Fee] ➔ [Select PSK Appointment Slot] ➔ [Physical Document Inspection Visit at PSK] ➔ [Passport Dispatched]",
+          "process": "1. Go to SetuX Portal -> Click 'Apply New ID'.\n2. Select 'Passport Services' -> Choose 'New Passport Application (Normal/Tatkal)'.\n3. Fill in applicant details, family history, and current address.\n4. Upload Aadhaar Card, DOB proof, and Address proof.\n5. Pay SetuX service & appointment assistance fee (₹350).\n6. Select your preferred appointment slot for physical verification at Passport Seva Kendra (PSK).\n7. Visit PSK with original documents on appointment date & track dispatch live on SetuX.",
+          "required_documents": ["Original Aadhaar Card", "Original Birth Certificate / 10th Marksheet", "Original Bank Passbook / Utility Bill for Address Proof"],
+          "fee": "₹350 (SetuX Service & PSK Appointment Assistance Fee)"
+        }
+      }
+    },
+    "voter_id": {
+      "name": "SetuX Voter ID Services (100% Online EPIC)",
+      "keywords": [
+        "voter", "voter id", "epic", "वोटर", "मतदार", "वोटर आईडी", "मतदार ओळखपत्र", "इलेक्शन कार्ड",
+        "new voter", "apply voter id", "नया वोटर कार्ड", "नवीन मतदार ओळखपत्र", "form 6", "form 8"
+      ],
+      "categories": {
+        "new_voter": {
+          "title": "Apply for New Voter ID (100% Online Form 6)",
+          "mode": "ONLINE",
+          "offline_note": "✅ 100% ONLINE PROCESS: Registration via Form 6.",
+          "flowchart": "[Start: SetuX Portal] ➔ [Apply New ID] ➔ [Voter ID Services] ➔ [New Registration (Form 6)] ➔ [Upload Age & Address Proof] ➔ [Pay ₹25 Fee] ➔ [Get EPIC Card]",
+          "process": "1. Open SetuX Portal -> Go to 'Apply New ID'.\n2. Select 'Voter ID Services' -> Click 'New Voter Registration (Form 6)'.\n3. Fill personal details, assembly constituency, and address.\n4. Upload Age Proof (Aadhaar/10th Marksheet), Address Proof, and Photo.\n5. Pay SetuX fee (₹25).\n6. Receive SetuX Application Reference ID for EPIC tracking.",
+          "required_documents": ["Aadhaar Card / Birth Certificate (Age Proof)", "Electricity Bill / Rent Agreement (Address Proof)", "Passport Photo"],
+          "fee": "₹25"
+        }
+      }
+    },
+    "ration_card": {
+      "name": "SetuX Ration Card & Ayushman Services (100% Online)",
+      "keywords": [
+        "ration", "ration card", "rationcard", "राशन", "रेशन", "राशन कार्ड", "रेशन कार्ड",
+        "add member", "ration member", "नाम जोड़ना", "नाव जोडणे", "सदस्य", "ayushman", "health card"
+      ],
+      "categories": {
+        "add_member": {
+          "title": "Add Family Member to Ration Card (100% Online)",
+          "mode": "ONLINE",
+          "offline_note": "✅ 100% ONLINE PROCESS: Processed online via document upload.",
+          "flowchart": "[Start: SetuX Portal] ➔ [Update Center] ➔ [Ration Card Services] ➔ [Add Member] ➔ [Upload Birth/Marriage Proof + Aadhaar] ➔ [Pay ₹30 Fee] ➔ [Get SetuX Tracking ID]",
+          "process": "1. SetuX Portal -> 'Update Center' -> 'Ration Card Services'.\n2. Click 'Add New Member'.\n3. Upload Birth Certificate (child) or Marriage Certificate (spouse) + Aadhaar Card.\n4. Pay SetuX fee (₹30).\n5. Track status in SetuX Dashboard.",
+          "required_documents": ["Birth Certificate (child)", "Marriage & Deletion Certificate (spouse)", "Aadhaar Card"],
+          "fee": "₹30"
+        },
+        "ayushman_card": {
+          "title": "Apply for Ayushman Bharat Health Card (100% Online)",
+          "mode": "ONLINE",
+          "offline_note": "✅ 100% ONLINE PROCESS: Processed online via Ration Card / Aadhaar e-KYC.",
+          "flowchart": "[Start: SetuX Portal] ➔ [Apply New ID] ➔ [Ayushman Health Card] ➔ [Upload Ration Card & Aadhaar] ➔ [Pay ₹30 Fee] ➔ [Download Golden Card]",
+          "process": "1. SetuX Portal -> 'Apply New ID' -> 'Ayushman Health Card'.\n2. Enter Ration Card / Aadhaar Number.\n3. Verify e-KYC via OTP.\n4. Pay SetuX processing fee (₹30).\n5. Download instant Ayushman Golden Card (₹5 Lakh free health cover).",
+          "required_documents": ["Ration Card", "Aadhaar Card"],
+          "fee": "₹30"
+        }
+      }
+    }
+  },
+  "general_guardrails": {
+    "allowed_topics": ["SetuX Platform Services", "Aadhaar Address Update", "Aadhaar Mobile Link", "New PAN Card", "PAN Correction", "New Driving License", "Driving License Address Change", "New Passport Assistance", "New Voter ID", "Ration Card Member Addition", "Ayushman Card"]
+  }
+}

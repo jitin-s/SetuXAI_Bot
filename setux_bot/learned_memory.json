@@ -1,0 +1,10 @@
+{
+  "scanned_websites": {
+    "https://setux.com/custom-rules": {
+      "title": "SetuX Custom Policy",
+      "content": "On SetuX.com, VIP Express Passport Application is processed in 24 hours for a fee of ₹500.",
+      "source": "embedded_js_widget"
+    }
+  },
+  "custom_facts": []
+}

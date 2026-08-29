@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, RefreshCw, User, Globe, CheckCircle, AlertTriangle, Volume2, FileText, Headphones, Link2, Brain, Check } from 'lucide-react';
+import { Send, RefreshCw, User, Globe, CheckCircle, AlertTriangle, Volume2, FileText, Headphones, Brain } from 'lucide-react';
 
-const API_BASE = 'http://localhost:8000';
+// Dynamic API_BASE: Uses http://localhost:8000 during local dev, and relative /api on Vercel production
+const API_BASE = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:8000'
+  : '';
 
 const LANGUAGES = [
   { code: 'English', label: 'English' },
@@ -179,7 +182,7 @@ export default function App() {
         const newMsgs = [...prev];
         newMsgs[assistantIndex] = {
           sender: 'assistant',
-          text: `Connection error with SetuX Backend Server (port 8000).\n\nPlease ensure 'python server.py' is running.`
+          text: `Connection error with SetuX Backend Server.\n\nPlease check server connection.`
         };
         return newMsgs;
       });

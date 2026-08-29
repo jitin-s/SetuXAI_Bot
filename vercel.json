@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "webpage/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "server.py"
+    },
+    {
+      "src": "/setux-widget.js",
+      "dest": "webpage/public/setux-widget.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "webpage/$1"
+    }
+  ]
+}

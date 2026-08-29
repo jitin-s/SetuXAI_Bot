@@ -22,7 +22,7 @@ class OllamaClient:
 
     def get_available_models(self) -> List[str]:
         if self.groq_api_key:
-            return ["qwen-2.5-72b-instruct", "llama-3.3-70b-versatile", "mixtral-8x7b-32768"]
+            return ["llama-3.3-70b-versatile", "llama3-70b-8192", "mixtral-8x7b-32768", "gemma2-9b-it"]
         try:
             res = requests.get(f"{self.base_url}/api/tags", timeout=3)
             if res.status_code == 200:
@@ -34,7 +34,8 @@ class OllamaClient:
 
     def _select_best_model(self, target_language: str = "English") -> str:
         if self.groq_api_key:
-            return "qwen-2.5-72b-instruct" if target_language != "English" else "llama-3.3-70b-versatile"
+            # Official Groq model ID (llama-3.3-70b-versatile is ultra-fast & supports all Indian languages)
+            return "llama-3.3-70b-versatile"
 
         if self.explicit_model:
             return self.explicit_model
@@ -61,7 +62,7 @@ class OllamaClient:
             "Content-Type": "application/json"
         }
         payload = {
-            "model": model,
+            "model": "llama-3.3-70b-versatile",
             "messages": messages,
             "temperature": temperature,
             "max_tokens": max_tokens,
@@ -74,10 +75,13 @@ class OllamaClient:
                     if line:
                         line_str = line.decode("utf-8")
                         if line_str.startswith("data: ") and line_str != "data: [DONE]":
-                            chunk = json.loads(line_str.replace("data: ", ""))
-                            content = chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
-                            if content:
-                                yield content
+                            try:
+                                chunk = json.loads(line_str.replace("data: ", ""))
+                                content = chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
+                                if content:
+                                    yield content
+                            except Exception:
+                                pass
             else:
                 yield f"\n[Error Groq API: Status {res.status_code}]"
         except Exception as e:
@@ -85,7 +89,7 @@ class OllamaClient:
 
     def chat_completion_stream(self, messages: List[Dict[str, str]], temperature: float = 0.1, max_tokens: int = 250, target_language: str = "English") -> Generator[str, None, None]:
         if self.groq_api_key:
-            model = self._select_best_model(target_language)
+            model = "llama-3.3-70b-versatile"
             yield from self._chat_groq_stream(messages, model, temperature, max_tokens)
             return
 

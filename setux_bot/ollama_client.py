@@ -23,7 +23,7 @@ class OllamaClient:
 
     def get_available_models(self) -> List[str]:
         if self.groq_api_key:
-            return ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+            return ["llama-3.1-8b-instant", "llama3-70b-8192", "llama3-8b-8192"]
         try:
             res = requests.get(f"{self.base_url}/api/tags", timeout=3)
             if res.status_code == 200:
@@ -35,7 +35,7 @@ class OllamaClient:
 
     def _select_best_model(self, target_language: str = "English") -> str:
         if self.groq_api_key:
-            return "llama-3.3-70b-versatile"
+            return "llama-3.1-8b-instant"
 
         if self.explicit_model:
             return self.explicit_model
@@ -61,35 +61,46 @@ class OllamaClient:
             "Authorization": f"Bearer {self.groq_api_key}",
             "Content-Type": "application/json"
         }
-        payload = {
-            "model": "llama-3.3-70b-versatile",
-            "messages": messages,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-            "stream": True
-        }
-        try:
-            res = requests.post(url, json=payload, headers=headers, stream=True, timeout=30)
-            if res.status_code == 200:
-                for line in res.iter_lines():
-                    if line:
-                        line_str = line.decode("utf-8")
-                        if line_str.startswith("data: ") and line_str != "data: [DONE]":
-                            try:
-                                chunk = json.loads(line_str.replace("data: ", ""))
-                                content = chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
-                                if content:
-                                    yield content
-                            except Exception:
-                                pass
-            else:
-                yield f"\n[Error Groq API: Status {res.status_code} - {res.text[:150]}]"
-        except Exception as e:
-            yield f"\n[Error Groq Cloud Inference: {str(e)}]"
+        
+        # Models available on all Groq developer accounts
+        models_to_try = ["llama-3.1-8b-instant", "llama3-70b-8192", "llama3-8b-8192"]
+        
+        for candidate_model in models_to_try:
+            payload = {
+                "model": candidate_model,
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "stream": True
+            }
+            try:
+                res = requests.post(url, json=payload, headers=headers, stream=True, timeout=30)
+                if res.status_code == 200:
+                    for line in res.iter_lines():
+                        if line:
+                            line_str = line.decode("utf-8")
+                            if line_str.startswith("data: ") and line_str != "data: [DONE]":
+                                try:
+                                    chunk = json.loads(line_str.replace("data: ", ""))
+                                    content = chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
+                                    if content:
+                                        yield content
+                                except Exception:
+                                    pass
+                    return # Stream completed successfully!
+                else:
+                    err_body = res.text[:200]
+                    if candidate_model != models_to_try[-1]:
+                        continue # Try next candidate model
+                    yield f"\n[Error Groq API: Status {res.status_code} - {err_body}]"
+                    return
+            except Exception as e:
+                yield f"\n[Error Groq Cloud Inference: {str(e)}]"
+                return
 
     def chat_completion_stream(self, messages: List[Dict[str, str]], temperature: float = 0.1, max_tokens: int = 250, target_language: str = "English") -> Generator[str, None, None]:
         if self.groq_api_key:
-            model = "llama-3.3-70b-versatile"
+            model = "llama-3.1-8b-instant"
             yield from self._chat_groq_stream(messages, model, temperature, max_tokens)
             return
 

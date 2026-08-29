@@ -57,9 +57,6 @@ class OllamaClient:
         return available[0] if available else "qwen2.5:1.5b"
 
     def _chat_openrouter_stream(self, messages: List[Dict[str, str]], temperature: float, max_tokens: int) -> Generator[str, None, None]:
-        """
-        Uses OpenRouter's 100% FREE 24/7 Permanent Qwen Model: qwen/qwen-2.5-7b-instruct:free
-        """
         url = "https://openrouter.ai/api/v1/chat/completions"
         headers = {
             "Authorization": f"Bearer {self.openrouter_api_key}",
@@ -68,7 +65,6 @@ class OllamaClient:
             "Content-Type": "application/json"
         }
         
-        # 100% FREE Permanent Models on OpenRouter
         free_models = [
             "qwen/qwen-2.5-7b-instruct:free",
             "meta-llama/llama-3.2-11b-vision-instruct:free",
@@ -97,11 +93,10 @@ class OllamaClient:
                                         yield content
                                 except Exception:
                                     pass
-                    return # Successfully streamed!
+                    return
             except Exception:
                 pass
                 
-        # Fallback to local Ollama if OpenRouter calls fail
         yield from self._chat_ollama_stream(messages, "English", temperature, max_tokens)
 
     def _chat_groq_stream(self, messages: List[Dict[str, str]], temperature: float, max_tokens: int) -> Generator[str, None, None]:
@@ -171,9 +166,13 @@ class OllamaClient:
         except requests.exceptions.Timeout:
             yield "\n[Error: Local LLM request timed out.]"
         except requests.exceptions.ConnectionError:
-            yield f"\n[Error: Cannot connect to Ollama at {self.base_url}. Ensure Ollama is running.]"
+            # Check if running in Vercel cloud environment
+            if os.getenv("VERCEL") or os.getenv("VERCEL_ENV"):
+                yield "\n[Vercel Setup Notice: Please set your FREE OPENROUTER_API_KEY or GROQ_API_KEY in Vercel Settings -> Environment Variables, then click Redeploy!]"
+            else:
+                yield f"\n[Error: Cannot connect to Ollama at {self.base_url}. Ensure 'ollama serve' or 'python server.py' is running on your computer.]"
         except Exception as e:
-            yield f"\n[Error communicating with Ollama: {str(e)}]"
+            yield f"\n[Error communicating with LLM: {str(e)}]"
 
     def chat_completion_stream(self, messages: List[Dict[str, str]], temperature: float = 0.1, max_tokens: int = 250, target_language: str = "English") -> Generator[str, None, None]:
         if self.openrouter_api_key:

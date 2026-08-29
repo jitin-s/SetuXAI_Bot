@@ -5,7 +5,8 @@ from typing import List, Dict, Any, Generator, Optional
 
 class OllamaClient:
     def __init__(self, base_url: str = None, model_name: str = None):
-        self.groq_api_key = os.getenv("GROQ_API_KEY")
+        raw_groq = os.getenv("GROQ_API_KEY")
+        self.groq_api_key = raw_groq.strip().strip('"').strip("'") if raw_groq else None
         self.base_url = (base_url or os.getenv("OLLAMA_BASE_URL") or "http://127.0.0.1:11434").rstrip("/")
         self.cpu_threads = max(1, (os.cpu_count() or 4) - 1)
         self.explicit_model = model_name
@@ -22,7 +23,7 @@ class OllamaClient:
 
     def get_available_models(self) -> List[str]:
         if self.groq_api_key:
-            return ["llama-3.3-70b-versatile", "llama3-70b-8192", "mixtral-8x7b-32768", "gemma2-9b-it"]
+            return ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768", "gemma2-9b-it"]
         try:
             res = requests.get(f"{self.base_url}/api/tags", timeout=3)
             if res.status_code == 200:
@@ -34,7 +35,6 @@ class OllamaClient:
 
     def _select_best_model(self, target_language: str = "English") -> str:
         if self.groq_api_key:
-            # Official Groq model ID (llama-3.3-70b-versatile is ultra-fast & supports all Indian languages)
             return "llama-3.3-70b-versatile"
 
         if self.explicit_model:
@@ -61,31 +61,42 @@ class OllamaClient:
             "Authorization": f"Bearer {self.groq_api_key}",
             "Content-Type": "application/json"
         }
-        payload = {
-            "model": "llama-3.3-70b-versatile",
-            "messages": messages,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-            "stream": True
-        }
-        try:
-            res = requests.post(url, json=payload, headers=headers, stream=True, timeout=30)
-            if res.status_code == 200:
-                for line in res.iter_lines():
-                    if line:
-                        line_str = line.decode("utf-8")
-                        if line_str.startswith("data: ") and line_str != "data: [DONE]":
-                            try:
-                                chunk = json.loads(line_str.replace("data: ", ""))
-                                content = chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
-                                if content:
-                                    yield content
-                            except Exception:
-                                pass
-            else:
-                yield f"\n[Error Groq API: Status {res.status_code}]"
-        except Exception as e:
-            yield f"\n[Error Groq Cloud Inference: {str(e)}]"
+        
+        # Models to try in order of fallback
+        models_to_try = [model, "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"]
+        
+        for candidate_model in models_to_try:
+            payload = {
+                "model": candidate_model,
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "stream": True
+            }
+            try:
+                res = requests.post(url, json=payload, headers=headers, stream=True, timeout=30)
+                if res.status_code == 200:
+                    for line in res.iter_lines():
+                        if line:
+                            line_str = line.decode("utf-8")
+                            if line_str.startswith("data: ") and line_str != "data: [DONE]":
+                                try:
+                                    chunk = json.loads(line_str.replace("data: ", ""))
+                                    content = chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
+                                    if content:
+                                        yield content
+                                except Exception:
+                                    pass
+                    return # Successfully streamed!
+                else:
+                    err_body = res.text[:200]
+                    if candidate_model != models_to_try[-1]:
+                        continue # Try next fallback model
+                    yield f"\n[Error Groq API: Status {res.status_code} - {err_body}]"
+                    return
+            except Exception as e:
+                yield f"\n[Error Groq Cloud Inference: {str(e)}]"
+                return
 
     def chat_completion_stream(self, messages: List[Dict[str, str]], temperature: float = 0.1, max_tokens: int = 250, target_language: str = "English") -> Generator[str, None, None]:
         if self.groq_api_key:

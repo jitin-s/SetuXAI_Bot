@@ -1,6 +1,7 @@
 (function () {
-  const SERVER_URL = "http://localhost:8000";
-  const WIDGET_IFRAME_URL = "http://localhost:5173";
+  // Configurable API Backend URL: Defaults to window.SETUX_AI_API_URL or localhost:8000
+  const SERVER_URL = (window.SETUX_AI_CONFIG && window.SETUX_AI_CONFIG.apiUrl) || "http://localhost:8000";
+  const WIDGET_IFRAME_URL = (window.SETUX_AI_CONFIG && window.SETUX_AI_CONFIG.widgetUrl) || "http://localhost:5173";
 
   // 1. Auto-Scan Host Website Content & Send Payload to AI Backend
   function autoScanHostWebsite() {

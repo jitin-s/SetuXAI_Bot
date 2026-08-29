@@ -204,7 +204,7 @@ export default function App() {
   };
 
   return (
-    <div>
+    <div style={{ overflowX: 'hidden', maxWidth: '100vw' }}>
       {/* FIXED NON-SCROLLABLE STICKY HEADER SECTION */}
       <div className="sticky-header-container">
         {/* Top Tricolor Banner */}
@@ -226,14 +226,14 @@ export default function App() {
             <button
               className="tool-btn"
               onClick={() => setShowScannerModal(!showScannerModal)}
-              style={{ background: '#2563eb', borderColor: '#3b82f6', display: 'flex', alignItems: 'center', gap: '4px' }}
+              style={{ background: '#2563eb', borderColor: '#3b82f6', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
             >
               <Brain size={12} /> Sync / Learn Website ({scannedWebsitesCount})
             </button>
 
             {/* Text Resizing Toolbar */}
             <div className="accessibility-toolbar">
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, marginRight: '4px' }}>Text Size:</span>
+              <span className="tb-label">Text:</span>
               <button className={`tool-btn ${fontSize === 'small' ? 'active' : ''}`} onClick={() => setFontSize('small')}>A-</button>
               <button className={`tool-btn ${fontSize === 'normal' ? 'active' : ''}`} onClick={() => setFontSize('normal')}>A</button>
               <button className={`tool-btn ${fontSize === 'large' ? 'active' : ''}`} onClick={() => setFontSize('large')}>A+</button>
@@ -241,7 +241,7 @@ export default function App() {
 
             {/* Theme Selector */}
             <div className="accessibility-toolbar">
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, marginRight: '4px' }}>Theme:</span>
+              <span className="tb-label">Theme:</span>
               <button className={`tool-btn ${themeMode === 'standard' ? 'active' : ''}`} onClick={() => setThemeMode('standard')}>Standard</button>
               <button className={`tool-btn ${themeMode === 'contrast' ? 'active' : ''}`} onClick={() => setThemeMode('contrast')}>Contrast</button>
               <button className={`tool-btn ${themeMode === 'blue' ? 'active' : ''}`} onClick={() => setThemeMode('blue')}>Dark Blue</button>
@@ -259,33 +259,33 @@ export default function App() {
             </div>
           </div>
 
-          <button onClick={handleClear} className="tool-btn" style={{ padding: '0.45rem 0.85rem' }}>
+          <button onClick={handleClear} className="tool-btn" style={{ padding: '0.4rem 0.75rem' }}>
             <RefreshCw size={12} style={{ display: 'inline', marginRight: 4 }} /> Clear
           </button>
         </header>
 
         {/* Website Self-Learning Bar Modal / Drawer */}
         {showScannerModal && (
-          <div style={{ background: '#1e293b', borderBottom: '2px solid #2563eb', padding: '0.75rem 2rem', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, fontSize: '0.85rem' }}>
-              <Brain size={16} color="#60a5fa" />
-              Website Scanner & Self-Learning Engine:
+          <div style={{ background: '#1e293b', borderBottom: '2px solid #2563eb', padding: '0.75rem 1rem', color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 600, fontSize: '0.82rem' }}>
+              <Brain size={15} color="#60a5fa" />
+              Website Scanner:
             </div>
-            <form onSubmit={handleScanWebsite} style={{ display: 'flex', gap: '0.5rem', flex: 1 }}>
+            <form onSubmit={handleScanWebsite} style={{ display: 'flex', gap: '0.5rem', flex: 1, minWidth: '220px' }}>
               <input
                 type="text"
                 value={scanUrlInput}
                 onChange={(e) => setScanUrlInput(e.target.value)}
-                placeholder="Enter website URL to crawl & learn (e.g. https://setux.com)..."
-                style={{ flex: 1, padding: '0.4rem 0.8rem', borderRadius: '4px', border: '1px solid #475569', background: '#0f172a', color: '#ffffff', fontSize: '0.85rem' }}
+                placeholder="Enter URL (e.g. https://setux.com)..."
+                style={{ flex: 1, padding: '0.35rem 0.65rem', borderRadius: '4px', border: '1px solid #475569', background: '#0f172a', color: '#ffffff', fontSize: '0.82rem', minWidth: '0' }}
                 disabled={scanning}
               />
-              <button type="submit" className="send-btn" style={{ padding: '0 1rem', height: '32px' }} disabled={scanning || !scanUrlInput.trim()}>
-                {scanning ? 'Scanning...' : 'Scan & Learn'}
+              <button type="submit" className="send-btn" style={{ padding: '0 0.85rem', height: '30px', fontSize: '0.8rem' }} disabled={scanning || !scanUrlInput.trim()}>
+                {scanning ? 'Scanning...' : 'Scan'}
               </button>
             </form>
             {scanStatusMsg && (
-              <span style={{ fontSize: '0.8rem', color: scanStatusMsg.startsWith('✓') ? '#4ade80' : '#f87171' }}>
+              <span style={{ fontSize: '0.78rem', color: scanStatusMsg.startsWith('✓') ? '#4ade80' : '#f87171' }}>
                 {scanStatusMsg}
               </span>
             )}
@@ -305,37 +305,19 @@ export default function App() {
       <div className="gov-container" id="main-content">
         <div className="portal-grid-layout">
           
-          {/* Left Column: Official Helplines Directory Card */}
-          <aside className="left-sidebar">
-            <div className="gov-card">
-              <div className="card-header">
-                <Headphones size={16} /> Official Document Helplines
-              </div>
-              <div className="card-body">
-                {HELPLINES.map((item, idx) => (
-                  <div key={idx} className="helpline-row">
-                    <div className="hr-title">{item.service}</div>
-                    <div className="hr-phone">{item.number}</div>
-                    <div className="hr-meta">{item.email} • {item.note}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </aside>
-
-          {/* Right Column: Interactive AI Helpdesk Chat */}
+          {/* AI Helpdesk Chat Window (Positioned FIRST in DOM structure) */}
           <main className="chat-main-window">
             {/* CHAT BANNER HEADER WITH LANGUAGE BUTTON */}
             <div className="chat-banner-bar">
-              <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1e3a8a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <FileText size={16} /> SetuX Online Helpdesk Assistant
+              <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#1e3a8a', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <FileText size={15} /> SetuX Online Helpdesk Assistant
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                {/* Language Button / Selector inside Chat Box Banner */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {/* Language Selector Dropdown inside Chat Box */}
                 <div className="chat-lang-button-group">
-                  <Globe size={14} color="#1e3a8a" />
-                  <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1e3a8a' }}>Language:</span>
+                  <Globe size={13} color="#1e3a8a" />
+                  <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#1e3a8a' }}>Lang:</span>
                   <select
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
@@ -347,7 +329,7 @@ export default function App() {
                   </select>
                 </div>
 
-                <div style={{ fontSize: '0.78rem', color: '#15803d', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div style={{ fontSize: '0.75rem', color: '#15803d', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
                   ● Active
                 </div>
               </div>
@@ -358,7 +340,7 @@ export default function App() {
               {messages.map((msg, index) => (
                 <div key={index} className={`message-wrapper ${msg.sender}`}>
                   <div className="avatar">
-                    {msg.sender === 'user' ? <User size={16} /> : 'S'}
+                    {msg.sender === 'user' ? <User size={15} /> : 'S'}
                   </div>
                   <div className="message-bubble">
                     {msg.text.includes('100% Online') && (
@@ -414,7 +396,7 @@ export default function App() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={`Enter query in ${language}... (e.g. How to update address in driving license?)`}
+                placeholder={`Enter query in ${language}... (e.g. How to update address?)`}
                 className="chat-input"
                 disabled={loading}
               />
@@ -423,6 +405,24 @@ export default function App() {
               </button>
             </form>
           </main>
+
+          {/* Official Helplines Directory Card (Positioned SECOND in DOM structure) */}
+          <aside className="left-sidebar">
+            <div className="gov-card">
+              <div className="card-header">
+                <Headphones size={15} /> Official Document Helplines
+              </div>
+              <div className="card-body">
+                {HELPLINES.map((item, idx) => (
+                  <div key={idx} className="helpline-row">
+                    <div className="hr-title">{item.service}</div>
+                    <div className="hr-phone">{item.number}</div>
+                    <div className="hr-meta">{item.email} • {item.note}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
 
         </div>
       </div>

@@ -5,8 +5,14 @@ from typing import List, Dict, Any, Generator, Optional
 
 class OllamaClient:
     def __init__(self, base_url: str = None, model_name: str = None):
+        raw_openrouter = os.getenv("OPENROUTER_API_KEY")
         raw_groq = os.getenv("GROQ_API_KEY")
-        # Ignore empty/dummy keys
+
+        if raw_openrouter and raw_openrouter.strip() and raw_openrouter.strip().lower() not in ["none", "null", "false", "undefined"]:
+            self.openrouter_api_key = raw_openrouter.strip().strip('"').strip("'")
+        else:
+            self.openrouter_api_key = None
+
         if raw_groq and raw_groq.strip() and raw_groq.strip().lower() not in ["none", "null", "false", "undefined"]:
             self.groq_api_key = raw_groq.strip().strip('"').strip("'")
         else:
@@ -18,7 +24,7 @@ class OllamaClient:
         self.model_name = model_name or self._select_best_model("English")
 
     def is_server_online(self) -> bool:
-        if self.groq_api_key:
+        if self.openrouter_api_key or self.groq_api_key:
             return True
         try:
             res = requests.get(f"{self.base_url}/api/tags", timeout=3)
@@ -44,16 +50,95 @@ class OllamaClient:
         if not available:
             return "qwen2.5:1.5b"
             
-        if target_language != "English":
-            for m in available:
-                if "coder" in m or "7b" in m or "8b" in m or "qwen" in m:
-                    return m
-                    
         for cand in ["qwen2.5:1.5b", "qwen2.5:0.5b", "llama3.2:1b", "qwen2.5-coder:latest"]:
             if cand in available or any(m.startswith(cand) for m in available):
                 return next(m for m in available if m == cand or m.startswith(cand))
                 
         return available[0] if available else "qwen2.5:1.5b"
+
+    def _chat_openrouter_stream(self, messages: List[Dict[str, str]], temperature: float, max_tokens: int) -> Generator[str, None, None]:
+        """
+        Uses OpenRouter's 100% FREE 24/7 Permanent Qwen Model: qwen/qwen-2.5-7b-instruct:free
+        """
+        url = "https://openrouter.ai/api/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self.openrouter_api_key}",
+            "HTTP-Referer": "https://setux.com",
+            "X-Title": "SetuX AI",
+            "Content-Type": "application/json"
+        }
+        
+        # 100% FREE Permanent Models on OpenRouter
+        free_models = [
+            "qwen/qwen-2.5-7b-instruct:free",
+            "meta-llama/llama-3.2-11b-vision-instruct:free",
+            "google/gemma-2-9b-it:free"
+        ]
+        
+        for model in free_models:
+            payload = {
+                "model": model,
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "stream": True
+            }
+            try:
+                res = requests.post(url, json=payload, headers=headers, stream=True, timeout=20)
+                if res.status_code == 200:
+                    for line in res.iter_lines():
+                        if line:
+                            line_str = line.decode("utf-8")
+                            if line_str.startswith("data: ") and line_str != "data: [DONE]":
+                                try:
+                                    chunk = json.loads(line_str.replace("data: ", ""))
+                                    content = chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
+                                    if content:
+                                        yield content
+                                except Exception:
+                                    pass
+                    return # Successfully streamed!
+            except Exception:
+                pass
+                
+        # Fallback to local Ollama if OpenRouter calls fail
+        yield from self._chat_ollama_stream(messages, "English", temperature, max_tokens)
+
+    def _chat_groq_stream(self, messages: List[Dict[str, str]], temperature: float, max_tokens: int) -> Generator[str, None, None]:
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self.groq_api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        candidates = ["llama-3.1-8b-instant", "gemma2-9b-it"]
+        for candidate in candidates:
+            payload = {
+                "model": candidate,
+                "messages": messages,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "stream": True
+            }
+            try:
+                res = requests.post(url, json=payload, headers=headers, stream=True, timeout=15)
+                if res.status_code == 200:
+                    for line in res.iter_lines():
+                        if line:
+                            line_str = line.decode("utf-8")
+                            if line_str.startswith("data: ") and line_str != "data: [DONE]":
+                                try:
+                                    chunk = json.loads(line_str.replace("data: ", ""))
+                                    content = chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
+                                    if content:
+                                        yield content
+                                except Exception:
+                                    pass
+                    return
+            except Exception:
+                pass
+                
+        yield from self._chat_ollama_stream(messages, "English", temperature, max_tokens)
 
     def _chat_ollama_stream(self, messages: List[Dict[str, str]], target_language: str, temperature: float, max_tokens: int) -> Generator[str, None, None]:
         url = f"{self.base_url}/api/chat"
@@ -90,50 +175,10 @@ class OllamaClient:
         except Exception as e:
             yield f"\n[Error communicating with Ollama: {str(e)}]"
 
-    def _chat_groq_stream(self, messages: List[Dict[str, str]], temperature: float, max_tokens: int) -> Generator[str, None, None]:
-        url = "https://api.groq.com/openai/v1/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {self.groq_api_key}",
-            "Content-Type": "application/json"
-        }
-        
-        # Candidate Groq models
-        candidates = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile", "gemma2-9b-it"]
-        success = False
-        
-        for candidate in candidates:
-            payload = {
-                "model": candidate,
-                "messages": messages,
-                "temperature": temperature,
-                "max_tokens": max_tokens,
-                "stream": True
-            }
-            try:
-                res = requests.post(url, json=payload, headers=headers, stream=True, timeout=15)
-                if res.status_code == 200:
-                    for line in res.iter_lines():
-                        if line:
-                            line_str = line.decode("utf-8")
-                            if line_str.startswith("data: ") and line_str != "data: [DONE]":
-                                try:
-                                    chunk = json.loads(line_str.replace("data: ", ""))
-                                    content = chunk.get("choices", [{}])[0].get("delta", {}).get("content", "")
-                                    if content:
-                                        yield content
-                                except Exception:
-                                    pass
-                    success = True
-                    break
-            except Exception:
-                pass
-                
-        if not success:
-            # If Groq fails, automatically fall back to Ollama Qwen model!
-            yield from self._chat_ollama_stream(messages, "English", temperature, max_tokens)
-
     def chat_completion_stream(self, messages: List[Dict[str, str]], temperature: float = 0.1, max_tokens: int = 250, target_language: str = "English") -> Generator[str, None, None]:
-        if self.groq_api_key:
+        if self.openrouter_api_key:
+            yield from self._chat_openrouter_stream(messages, temperature, max_tokens)
+        elif self.groq_api_key:
             yield from self._chat_groq_stream(messages, temperature, max_tokens)
         else:
             yield from self._chat_ollama_stream(messages, target_language, temperature, max_tokens)

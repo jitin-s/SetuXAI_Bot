@@ -23,7 +23,7 @@ class OllamaClient:
 
     def get_available_models(self) -> List[str]:
         if self.groq_api_key:
-            return ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768", "gemma2-9b-it"]
+            return ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "llama3-70b-8192", "llama3-8b-8192"]
         try:
             res = requests.get(f"{self.base_url}/api/tags", timeout=3)
             if res.status_code == 200:
@@ -62,8 +62,8 @@ class OllamaClient:
             "Content-Type": "application/json"
         }
         
-        # Models to try in order of fallback
-        models_to_try = [model, "llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"]
+        # Currently active, supported Groq models (excluding decommissioned models)
+        models_to_try = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "llama3-70b-8192", "llama3-8b-8192"]
         
         for candidate_model in models_to_try:
             payload = {
@@ -87,11 +87,11 @@ class OllamaClient:
                                         yield content
                                 except Exception:
                                     pass
-                    return # Successfully streamed!
+                    return # Stream completed successfully!
                 else:
-                    err_body = res.text[:200]
+                    err_body = res.text[:250]
                     if candidate_model != models_to_try[-1]:
-                        continue # Try next fallback model
+                        continue # Try next active model in list
                     yield f"\n[Error Groq API: Status {res.status_code} - {err_body}]"
                     return
             except Exception as e:

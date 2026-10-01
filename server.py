@@ -16,7 +16,7 @@ app = FastAPI(
     version="2.0.0"
 )
 
-# Enable CORS for React Frontend and Host Websites
+## Enable CORS for React Frontend and Host Websites
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
